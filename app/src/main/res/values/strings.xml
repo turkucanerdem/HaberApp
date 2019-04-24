@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">HaberApp</string>
+    <string name="gundem">Gündem</string>
+    <string name="ekonomi">Ekonomi</string>
+    <string name="egitim">Eğitim</string>
+    <string name="spor">Spor</string>
+    <string name="goruntule">Haberleri Görüntüle</string>
+</resources>
