@@ -1,5 +1,6 @@
 package com.example.haberapp;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -7,10 +8,12 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -29,16 +32,56 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    private void attemptSend() {
+    private void attemptSendHaberAl(boolean spor, boolean gundem, boolean egitim, boolean ekonomi) {
 
         JSONObject obj = new JSONObject();
+        ArrayList<String> list = new ArrayList<String>();
+
         try {
-            obj.put("idhaber", 1);
-            System.out.println("LLLLLL");
+            if(spor)
+                list.add("spor");
+
+            if(gundem)
+                list.add("gundem");
+
+            if(egitim)
+                list.add("egitim");
+
+            if(ekonomi)
+                list.add("ekonomi");
+
+            if(!((spor||gundem)||(egitim||ekonomi))){
+                list.add("spor");
+                list.add("gundem");
+                list.add("egitim");
+                list.add("ekonomi");
+            }
+
+            obj.put("haberturu",new JSONArray(list));
+
         }catch (JSONException e) { }
 
         System.out.println(mSocket.toString());
-        mSocket.emit("join", obj);
+        mSocket.emit("haberAl", obj);
+    }
+
+
+    private void attemptSendLike(int idhaber){
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("idhaber",idhaber);
+        }catch (JSONException e) { }
+        System.out.println(mSocket.toString());
+        mSocket.emit("begen", obj);
+    }
+
+    private void attemptSendDislike(int idhaber){
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("idhaber",idhaber);
+        }catch (JSONException e) { }
+        System.out.println(mSocket.toString());
+        mSocket.emit("begenme", obj);
     }
 
 
@@ -50,6 +93,27 @@ public class MainActivity extends AppCompatActivity {
                 public void run() {
 
                     Toast.makeText(getApplicationContext(), "Unable to connect to NodeJS server", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener getMesaj = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONArray dataArray = (JSONArray) args[0];
+                    try {
+                        Haber.createListForViewing(dataArray);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    System.out.println(dataArray.toString());
+                    startActivity(new Intent(MainActivity.this, UserListActivity.class));
+                    //Toast.makeText(getApplicationContext(), "Unable to connect to NodeJS server", Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -68,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
         mSocket = app.getSocket();
         mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mSocket.on("haberGonder",getMesaj);
         mSocket.connect();
 
 
@@ -77,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
         ekonomi = (CheckBox) findViewById(R.id.checkBox4);
 
         button = (Button) findViewById(R.id.button);
+
         button.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -91,7 +157,12 @@ public class MainActivity extends AppCompatActivity {
 
 
                 // Sending an object
-                attemptSend();
+                //attemptSendLike(1);
+                attemptSendHaberAl(sporisChecked,gundemisChecked,egitimisChecked,ekonomiisChecked);
+
+
+
+
             }
         });
     }
