@@ -66,23 +66,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void attemptSendLike(int idhaber){
-        JSONObject obj = new JSONObject();
-        try {
-            obj.put("idhaber",idhaber);
-        }catch (JSONException e) { }
-        System.out.println(mSocket.toString());
-        mSocket.emit("begen", obj);
-    }
 
-    private void attemptSendDislike(int idhaber){
-        JSONObject obj = new JSONObject();
-        try {
-            obj.put("idhaber",idhaber);
-        }catch (JSONException e) { }
-        System.out.println(mSocket.toString());
-        mSocket.emit("begenme", obj);
-    }
 
 
     private Emitter.Listener onConnectError = new Emitter.Listener() {
